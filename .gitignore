@@ -2,6 +2,7 @@
 **/Backup
 **/Data
 **/Plots
+**/Other
 
 # Files
 *.pkl
