@@ -3,6 +3,11 @@
 **/Data
 **/Plots
 **/Other
+**/Classifiers
+**/CARDSvalidation
+**/WriteUP
+**/Models
+
 
 # Files
 *.pkl
