@@ -15,12 +15,22 @@ library(janitor)
 
 # Setup ----
 ## Load & prepare data ----
-
-setwd("~/OneDrive - University of Exeter/Projects/GitHub/contrarian-discourses-against-cap-and-trade")
-filepath_plots = "/Users/mn/Library/CloudStorage/OneDrive-UniversityofExeter/Projects/GitHub/contrarian-discourses-against-cap-and-trade/Plots/"
+getwd()
+# Set the working directory to the github repository 
+# folder contrarian-discourses-against-cap-and-trade
+setwd("../")
+# Create a folder for the Plots
+dir.create("Plots")
+# Save the filepath to the folder called Plots
+filepath_plots = paste0(toString(getwd()), "/Plots/")
 
 ### Labelled contrarian paragraphs ----
 df <- read.csv("Data/contrarian_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv")
+
+# Save dataframe for second labelling
+write.csv(df %>% select(id, text), 
+          "Data/CDACAT_contrarian_paragraphs_for_second_labelling.csv",
+          row.names = F)
 
 #### Integrate final taxonomy revisions ----
 
@@ -274,7 +284,6 @@ CII_val <-  read.csv("Data/codacat_validation_samples_cii_labelled.csv")
 
 ## Table 1: Hearings overview ---- 
 
-
 overview_table <-
   df4 %>% 
   mutate(witness_con = ifelse(witness_contrarian == "Contrarian", 1, 0),
@@ -289,6 +298,10 @@ overview_table <-
             witness_ffi = sum(witness_ffi),
             witness_cii = sum(witness_cii),
             paragraphs = sum(witness_paragraphs))
+
+
+# Proportion of hearings containing any claim / no claim
+round(prop.table(table(df$C0)), 2)
 
 
 # overview_table <- left_join(
