@@ -28,9 +28,9 @@ filepath_plots = paste0(toString(getwd()), "/Plots/")
 df <- read.csv("Data/contrarian_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv")
 
 # Save dataframe for second labelling
-write.csv(df %>% select(id, text), 
-          "Data/CDACAT_contrarian_paragraphs_for_second_labelling.csv",
-          row.names = F)
+# write.csv(df %>% select(id, text), 
+#           "Data/CDACAT_contrarian_paragraphs_for_second_labelling.csv",
+#           row.names = F)
 
 #### Integrate final taxonomy revisions ----
 
@@ -110,14 +110,14 @@ SubClaims_lvl2 = sort(names(df)[startsWith(names(df),"L2dummy")])
 SubClaims_lvl3 = sort(names(df)[startsWith(names(df),"L3dummy")])
 SubClaims_lvl4 = sort(names(df)[startsWith(names(df),"L4dummy")])
 
-# Safe the recoded version of the data for future classifier training
+# Save the recoded version of the data for future classifier training
 
 congress_capandtrade_03_10 <- df %>%
   select(id, text, SuperClaims, SubClaims_lvl2, SubClaims_lvl3)
 
-write.csv(congress_capandtrade_03_10,
-          "Data/congress_capandtrade_03_10.csv", 
-          row.names = F)
+# write.csv(congress_capandtrade_03_10,
+#           "Data/congress_capandtrade_03_10.csv", 
+#           row.names = F)
 
 ### All witness paragraphs with wordcount >=10 with claim 4 predictions----
 df4 <- read.csv("Data/inference_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv") %>%

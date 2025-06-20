@@ -1,7 +1,7 @@
 # Folders
 **/Backup
-**/Data
-**/Plots
+**/Data_all_scripts
+**/Plots_all_scripts
 **/Other
 **/Classifiers
 **/CARDSvalidation
@@ -40,3 +40,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Other
+.Rhistory
