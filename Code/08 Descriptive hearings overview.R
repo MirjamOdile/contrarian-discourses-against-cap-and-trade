@@ -1,4 +1,4 @@
-# Descriptives ----
+# Analysis ----
 
 # Libraries ----
 library(crosstable)
@@ -68,7 +68,6 @@ df$L2dummy_2_2 <- ifelse(df$L2dummy_2_2 + df$L3dummy_2_2_7 > 0, 1, 0)
 df$L2dummy_3_7 <- ifelse(df$L2dummy_3_7 + df$L2dummy_3_8 > 0, 1, 0)
 df <- df %>% select(!c(L2dummy_3_8))
 
-
 # Move It's the clouds in Water vapor is the most powerful greenhouse gas
 df$L3dummy_2_2_4 <- ifelse(df$L3dummy_2_2_4 + df$L3dummy_2_1_6 > 0, 1, 0)
 df <- df %>% select(!c(L3dummy_2_1_6))
@@ -84,21 +83,6 @@ df <- df %>% rename("L3dummy_4_3_6" = "L4dummy_4_3_4_3")
 # Limit parent category L3dummy_4_3_4 to remaining sub-claims
 df$L3dummy_4_3_4 <- df %>% select(L4dummy_4_3_4_1:L4dummy_4_3_4_2) %>%
   mutate(L3dummy_4_3_4 = ifelse(rowSums(.)>0,1,0)) %>% pull(L3dummy_4_3_4)
-
-
-# df$L2dummy_2_2 <- ifelse(df$L2dummy_2_2 + df$L2dummy_2_3 > 0, 1, 0)
-# df$L2dummy_2_3 <- df$L2dummy_2_4
-# df$L2dummy_2_4 <- df$L2dummy_2_5
-# df$L2dummy_3_7 <- ifelse(df$L2dummy_3_7 + df$L2dummy_3_8 > 0, 1, 0)
-# df <- df %>% select(!c(L2dummy_2_5, L2dummy_3_8))
-# # Integrate final taxonomy revisions at the level 2 sub-claim level
-# df <- df %>% rename("L3dummy_2_2_1" = "L3dummy_2_3_1",
-#                     "L3dummy_2_2_2" = "L3dummy_2_3_2",
-#                     "L3dummy_2_2_3" = "L3dummy_2_3_3",
-#                     "L3dummy_2_2_4" = "L3dummy_2_3_4",
-#                     "L3dummy_2_2_5" = "L3dummy_2_3_5",
-#                     "L3dummy_2_2_6" = "L3dummy_2_3_6",
-#                     )
 
 df %>% filter(L2dummy_3_1 == "1") %>% 
   tail()# %>% select(text)
@@ -196,29 +180,6 @@ legislation_important <- c("2003-01-09", "2003-10-30", "2005-05-26", "2005-06-22
 
 ## Time variable setup ----
 
-# halfyear <-
-#   data.frame(
-#     date = seq(as.Date("2003-01-01"), by = "day", 
-#                length.out = as.Date("2011-01-02") - as.Date("2003-01-01"))) %>% 
-#   mutate(term = floor_date(date, "halfyear"))
-# 
-# halfyears_labels <- 
-#   data.frame(date = seq(as.Date("2003-01-01"), by = "day", 
-#                         length.out = as.Date("2011-01-02") - as.Date("2003-01-01"))) %>% 
-#   mutate(term = floor_date(date, "halfyear")) %>% 
-#   select(!date) %>%
-#   unique() %>%
-#   mutate(month = format(as.Date(term), "%b"),
-#          year = format(as.Date(term), "%Y"),
-#          halfyears_labels = ifelse(month == "Jan", year, ""))
-# 
-# df <- df %>% 
-#   mutate(term = halfyears$term[match(as.Date(date), halfyears$date)])
-# 
-# df4 <- df4 %>% 
-#   mutate(term = halfyears$term[match(as.Date(date), halfyears$date)])
-
-
 halfyears <-
   data.frame(
     date = seq(as.Date("2003-01-01"), by = "day",
@@ -303,98 +264,12 @@ overview_table <-
 # Proportion of hearings containing any claim / no claim
 round(prop.table(table(df$C0)), 2)
 
-
-# overview_table <- left_join(
-#   df4 %>% group_by(date, title, hearing_id) %>% 
-#     summarise(TotalParagraphs = n()) %>% 
-#     arrange(date),
-#   df %>% group_by(date, title, hearing_id) %>% 
-#     summarise(CONClaimAny = sum(abs(C0-1))) %>% 
-#     arrange(date)) %>%
-#   left_join(., 
-#             FFI %>%  
-#               group_by(date, title, hearing_id) %>% 
-#               summarise(FFIClaim4 = sum(pred_4)) %>% 
-#               mutate(FFIClaim4 = 
-#                        round(FFIClaim4 *
-#                                PR$FFI_precision_boosted[4] /
-#                                PR$FFI_recall_boosted[4]))) %>%
-#   left_join(., 
-#             CII %>% group_by(date, title, hearing_id) %>% 
-#               summarise(CIIClaim4 = sum(pred_4)) %>% 
-#               mutate(CIIClaim4 = 
-#                        round(CIIClaim4 *
-#                                PR$CII_precision_boosted[4] /
-#                                PR$CII_recall_boosted[4]))) %>% 
-#   left_join(.,
-#             full_join(CON_labelled %>% group_by(date, title, hearing_id) %>% 
-#                         summarise(CONClaim4labelled = sum(pred_4)),
-#                       CON_predicted %>% group_by(date, title, hearing_id) %>% 
-#                         summarise(CONClaim4predicted = sum(pred_4)) %>% 
-#                         mutate(CONClaim4predicted = 
-#                                  round(CONClaim4predicted *
-#                                          PR$CON_precision_boosted[4] /
-#                                          PR$CON_recall_boosted[4]))) %>% 
-#               replace(is.na(.), 0) %>% 
-#               group_by(date, title, hearing_id) %>% 
-#               summarise(CONClaim4 = CONClaim4labelled +
-#                           CONClaim4predicted)) %>% 
-#   mutate(CONClaimAny_pr = CONClaimAny/TotalParagraphs*100,
-#          CONClaim4_pr = CONClaim4/TotalParagraphs*100,
-#          FFIClaim4_pr = FFIClaim4/TotalParagraphs*100,
-#          CIIClaim4_pr = CIIClaim4/TotalParagraphs*100) %>% 
-#   replace(is.na(.), 0) %>% 
-#   mutate(CFCClaim4 = rowSums(across(c(CONClaim4,FFIClaim4,CIIClaim4))),
-#          CFCClaim4_pr = CFCClaim4/TotalParagraphs*100) %>%
-#   select(date, title, hearing_id, 
-#          CONClaimAny, CONClaimAny_pr, 
-#          CONClaim4, CONClaim4_pr, FFIClaim4, FFIClaim4_pr,
-#          CIIClaim4, CIIClaim4_pr, CFCClaim4, CFCClaim4_pr, 
-#          TotalParagraphs) %>% 
-#   as.data.frame()
-# 
-# overview_table %>%
-#   select(!hearing_id) %>% 
-#   xtable::xtable(digits=c(0,0,0,0,1,0,1,0,1,0,1,0,1,0)) %>% 
-#   print(include.rownames=FALSE)
-# 
-# overview_table %>% 
-#   select(date, title, hearing_id,
-#          CONClaim4_pr, FFIClaim4_pr,
-#          CIIClaim4_pr, CFCClaim4_pr) %>% 
-#   pivot_longer(!c(date, title, hearing_id), 
-#                names_to = "type", values_to = "value") %>% 
-#   ggplot(aes(x = year(as.Date(date)), 
-#              y = value, 
-#              color = factor(year(as.Date(date))))) + 
-#   geom_boxplot() +
-#   facet_wrap(~type, nrow = 1) +
-#   theme_classic()
-# 
-# merge(
-#   overview_table,
-#   df4 %>% select(date, title, hearing_id, witness_category, witness) %>% 
-#     distinct() %>% 
-#     group_by(date, title, hearing_id, witness_category) %>% 
-#     summarise(witnesses = n()) %>% 
-#     pivot_wider(names_from = witness_category, values_from = witnesses) %>%
-#     janitor::clean_names() %>% 
-#     replace(is.na(.), 0) %>% 
-#     arrange(date)) %>% 
-#   filter(CONClaimAny == 0) %>% 
-#   filter(year(date) == 2009) 
-
 overview_table %>% xtable::xtable(digits=c(0,0,0,0,0,0,0,0))
 
 overview_table %>% 
   ungroup() %>% 
   select(witnesses:paragraphs) %>% 
   colSums()
-
-# overview_table %>%
-#   select(!hearing_id) %>% 
-#   xtable::xtable(digits=c(0,0,0,0,1,0,1,0,1,0,1,0,1,0)) %>% 
-#   print(include.rownames=FALSE)
 
 # Part 2: Contrarian claims (labelled) ----
 
@@ -429,32 +304,6 @@ claims_per_hearings <-
          title_date = paste(title, date),
          label = ifelse(count == 0, NA, count))
 
-# PA1 <-
-#   claims_per_hearings %>% 
-#   ggplot(aes(x = claim, y = fct_inorder(title_date), 
-#              fill = count_cat, label = label)) +
-#   geom_tile(alpha = .8) +
-#   geom_text(alpha = .7, size = 3) +
-#   scale_fill_manual(values = c("white", brewer.pal(name = "YlOrRd", 9))) +
-#   labs(x = "Super-claim",
-#        fill = "Count", 
-#        y = element_blank()) +
-#   theme_minimal() +
-#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-# 
-# ggsave(
-#   filename = "HearingsClaims.pdf",
-#   plot = PA1,
-#   device = "pdf",
-#   path = filepath_plots,
-#   scale = 1.5,
-#   width = 210,
-#   height = 275,
-#   units = c("mm"),
-#   dpi = 300,
-#   limitsize = TRUE,
-#   bg = NULL)
-
 PA1 <-
   claims_per_hearings %>% 
   ggplot(aes(x = claim, y = fct_inorder(title_date), 
@@ -482,7 +331,6 @@ ggsave(
   dpi = 300,
   limitsize = TRUE,
   bg = NULL)
-
 
 ## Plot 1: Super-claims over time and sub-claims by type of contrarian  ----
 
@@ -536,11 +384,6 @@ P1a <-
                         name = "Proportion of paragraphs",
                         breaks = pretty_breaks(7),
                         labels = label_percent(scale = 1))) +
-  # geom_vline(xintercept = legislation_important, linetype=4, color='darkgrey') +
-  # geom_vline(xintercept = legislation_complete$date_numeric,
-  #            linetype=4, color='darkgrey') +
-  # geom_text(mapping = aes(x = date_numeric, y = 500, label = id, angle = 90),
-  #           data = legislation_complete, size = 3, inherit.aes = F) +
   theme_classic() +
   theme(axis.line = element_blank(),
         panel.border = element_rect(colour = "gray", fill=NA, linewidth=1),
@@ -588,7 +431,6 @@ P1b <-
   geom_line(data = filter(SuperClaims_over_time, high == 1), size=1,  alpha = .7) +
   geom_point(data = filter(SuperClaims_over_time, low == 1), size=3,  alpha = .9) + 
   geom_point(data = filter(SuperClaims_over_time, high == 1), size=3,  alpha = .9) +
-  # geom_vline(xintercept = legislation_important, linetype=4, color='darkgrey') +
   scale_x_continuous(name = "Half-year",
                      breaks = halfyears_labels$term,
                      limits = c(min(halfyears$term), max(halfyears$term)),
@@ -785,51 +627,6 @@ SubClaims_3_over_time_per_witness <- df %>%
 
 ##### Check for notable trends ----
 
-# SubClaims_2_over_time_per_witness %>% 
-#   select(!utterance_count:ClaimTotal_per) %>% 
-#   pivot_longer(cols = starts_with("Claim1"),
-#                names_to = "claim",
-#                values_to = "claim_count") %>% 
-#   filter(claim_count != 0, claim != "ClaimTotal") %>% 
-#   ggplot() +
-#   geom_mosaic(aes(product(claim, congress), fill = claim))
-# 
-# SubClaims_2_over_time_per_witness %>% 
-#   select(!utterance_count:ClaimTotal_per) %>% 
-#   pivot_longer(cols = starts_with("Claim2"),
-#                names_to = "claim",
-#                values_to = "claim_count") %>% 
-#   filter(claim_count != 0, claim != "ClaimTotal") %>% 
-#   ggplot() +
-#   geom_mosaic(aes(product(claim, congress), fill = claim))
-# 
-# SubClaims_2_over_time_per_witness %>% 
-#   select(!utterance_count:ClaimTotal_per) %>% 
-#   pivot_longer(cols = starts_with("Claim3"),
-#                names_to = "claim",
-#                values_to = "claim_count") %>% 
-#   filter(claim_count != 0, claim != "ClaimTotal") %>% 
-#   ggplot() +
-#   geom_mosaic(aes(product(claim, congress), fill = claim))
-# 
-# SubClaims_2_over_time_per_witness %>% 
-#   select(!utterance_count:ClaimTotal_per) %>% 
-#   pivot_longer(cols = starts_with("Claim4"),
-#                names_to = "claim",
-#                values_to = "claim_count") %>% 
-#   filter(claim_count != 0, claim != "ClaimTotal") %>% 
-#   ggplot() +
-#   geom_mosaic(aes(product(claim, congress), fill = claim))
-# 
-# SubClaims_2_over_time_per_witness %>% 
-#   select(!utterance_count:ClaimTotal_per) %>% 
-#   pivot_longer(cols = starts_with("Claim5"),
-#                names_to = "claim",
-#                values_to = "claim_count") %>% 
-#   filter(claim_count != 0, claim != "ClaimTotal") %>% 
-#   ggplot() +
-#   geom_mosaic(aes(product(claim, congress), fill = claim))
-
 #### Counts per sub-claim -----
 SubClaims_3_totals_and_per <- 
   SubClaims_3_over_time_per_witness %>% 
@@ -898,60 +695,6 @@ df %>% filter(L3dummy_4_2_1 == "1") %>% select(text)
 
 df %>% filter(L4dummy_4_5_2_1 == "1") %>% select(text)
 
-
-# # Plot 2: Denialists vs. other contrarians over time 2do delete?
-# 
-# P2 <-
-#   df4 %>% select(hearing_id, term, witness, witness_denialist) %>% 
-#   distinct() %>%
-#   filter(witness_denialist != "Other witness") %>% 
-#   complete(term = halfyears$term, 
-#            witness_denialist = c("Denialist", "Other contrarian")) %>%
-#   filter(term < as.Date("2011-01-01")) %>% 
-#   mutate(count = ifelse(!is.na(witness), 1, 0)) %>% 
-#   group_by(term, witness_denialist, .drop = FALSE) %>% 
-#   summarise(count = sum(count)) %>% 
-#   mutate(count = ifelse(count == 0, 0.02, count),
-#          witness_denialist = factor(witness_denialist,
-#                                     levels = c("Other contrarian", "Denialist"))) %>% 
-#   ggplot(aes(x = term +90, y = count, group = witness_denialist,
-#              fill = witness_denialist, label = count)) +
-#   geom_bar(stat = "identity", position = "dodge", color = "black", size = .3) +
-#   scale_x_continuous(breaks = halfyears_labels$term,
-#                      labels = halfyears_labels$halfyears_labels,
-#                      expand = c(0.005,0.005)) +
-#   scale_fill_manual(values = c("gray60", "gray90")) +
-#   labs(x = "Half-year", y = "Count", fill = "Witness type") +
-#   theme_classic()
-# 
-# ## Export
-# 
-# ggsave(
-#   filename = "Contrarian_vs_denialist.pdf",
-#   plot = P2,
-#   device = "pdf",
-#   path = filepath_plots,
-#   scale = 1.5,
-#   width = 190,
-#   height = 50,
-#   units = c("mm"),
-#   dpi = 300,
-#   limitsize = TRUE,
-#   bg = NULL)
-# 
-# 
-# # Calculate claim intensity by witness type
-# 
-# df4 %>% 
-#   select(hearing_id, witness, witness_denialist) %>% 
-#   distinct() %>% 
-#   group_by(witness_denialist) %>% 
-#   summarise(n())
-# 
-# sum(SubClaims_2_totals_and_per$claim_count_other)/48
-# sum(SubClaims_2_totals_and_per$claim_count_denialist)/44
-
-
 ## Descriptives over time ----
 
 ### Hearings ----
@@ -990,7 +733,7 @@ SuperClaims_over_time %>% select(term, claim, claim_prevalence) %>%
 
 #### Super-claim in specific hearings / timeframes ----
 
-CONGRESS = 110
+CONGRESS = 109
 # Number of claims made by each contrarian witness during a specific congress
 df %>% 
   filter(congress == CONGRESS) %>% 
@@ -1020,7 +763,7 @@ df %>%
 
 ### Witnesses ----
 
-CONGRESS = 110
+CONGRESS = 109
 
 #### Halfyearly counts/proportions for a specific congress  ----
 
@@ -1077,12 +820,6 @@ df4 %>% filter(congress == CONGRESS) %>%
   replace(is.na(.), 0) %>% 
   mutate(prop_contrarian = contrarian/(contrarian+other_witness)) %>% 
   print(n=50)
-# filter(date >= "2005-10-01") %>% 
-# mutate(group = "group") %>% 
-# group_by(group) %>% 
-# summarise(contrarians = sum(contrarian), 
-#           others = sum(other_witness)) %>% 
-# mutate(prop_contrarian = contrarians/(contrarians+others))
 
 ##### By contrarian status and witness category ----
 for (i in 1:4) {
@@ -1101,7 +838,6 @@ for (i in 1:4) {
 #### Witnesses at a specific hearing ----
 df4 %>% filter(hearing_id == "110shrg88902") %>%
   select(hearing_id, witness, witness_denialist) %>% distinct()
-
 
 #### Contrarian access ----
 ##### Per congress ----
@@ -1138,7 +874,6 @@ df4 %>%
   replace(is.na(.), 0) %>% 
   mutate(prop_no_contrarians = any_contrarians_no/(any_contrarians_no+any_contrarians_yes),
          prop_any_contrarians = 1 - prop_no_contrarians)
-
 
 ## Multi-claim paragraphs ----
 
@@ -1556,16 +1291,6 @@ CON_combined_year_long <- CON_combined_year %>%
                                          "corrected (sample)",
                                          "corrected (boosted)")))
 
-# CON_combined_year_boosted <- CON_combined_year_long %>% 
-#   filter(Predictions == "corrected (boosted)") %>% 
-#   group_by(Claim) %>% 
-#   mutate(moving_avg = rollmean(count, k=2, fill=NA, align='center'),
-#          moving_avg = ifelse(moving_avg < 0, 0, moving_avg),
-#          moving_avg_per = rollmean(proportion, k=2, fill=NA, align='center'),
-#          moving_avg_per = ifelse(moving_avg_per < 0, 0, moving_avg_per)) %>% 
-#   ungroup() %>% as.data.frame() %>% 
-#   mutate(year = year)
-
 #### FFI ----
 
 FFI_claims_year <-
@@ -1617,16 +1342,6 @@ FFI_claims_year_long <- FFI_claims_year %>%
                                          "corrected (sample)",
                                          "corrected (boosted)"))) %>% 
   data.frame() 
-
-# FFI_claims_year_boosted <- FFI_claims_year_long %>% 
-#   filter(Predictions == "corrected (boosted)") %>% 
-#   group_by(Claim) %>% 
-#   mutate(moving_avg = rollmean(count, k=2, fill=NA, align='center'),
-#          moving_avg = ifelse(moving_avg < 0, 0, moving_avg),
-#          moving_avg_per = rollmean(proportion, k=2, fill=NA, align='center'),
-#          moving_avg_per = ifelse(moving_avg_per < 0, 0, moving_avg_per)) %>% 
-#   ungroup() %>% as.data.frame() %>% 
-#   mutate(year = year)
 
 #### CII ----
 
@@ -1681,52 +1396,6 @@ CII_claims_year_long <- CII_claims_year %>%
                                          "corrected (boosted)"))) %>% 
   data.frame() 
 
-# CII_claims_year_boosted <- CII_claims_year_long %>% 
-#   filter(Predictions == "corrected (boosted)") %>% 
-#   group_by(Claim) %>% 
-#   mutate(moving_avg = rollmean(count, k=2, fill=NA, align='center'),
-#          moving_avg = ifelse(moving_avg < 0, 0, moving_avg),
-#          moving_avg_per = rollmean(proportion, k=2, fill=NA, align='center'),
-#          moving_avg_per = ifelse(moving_avg_per < 0, 0, moving_avg_per)) %>% 
-#   ungroup() %>% as.data.frame() %>% 
-#   mutate(year = year)
-
-#### COMbined (boosted) ----
-# 
-# COM_claims_quarter_boosted <-
-#   rbind(FFI_claims_quarter_boosted %>% 
-#           mutate(type = "Fossil fuel industry (FFI)    "),
-#         CII_claims_quarter_boosted %>% 
-#           mutate(type = "Carbon-intensive industry (CII)    "),
-#         CON_combined_quarter_boosted %>% 
-#           mutate(type = "Contrarians    ")) %>% 
-#   filter(Predictions == "corrected (boosted)") %>% 
-#   select(!c(proportion, total, moving_avg, moving_avg_per, Predictions)) %>% 
-#   filter(Claim == "4") %>% 
-#   relocate(type, .after = Claim) %>% 
-#   group_by(quarter, Claim) %>%
-#   group_modify(~ adorn_totals(.x, where = "row")) %$% 
-#   merge(.,
-#         df4 %>%
-#           filter(type =="witness") %>%
-#           group_by(quarter) %>%
-#           summarise(total = n()),
-#         by = "quarter",
-#         all.x = T) %>%
-#   replace(is.na(.), 0) %>% 
-#   mutate(proportion = count/total*100,
-#          type = factor(type, 
-#                        levels = c("Contrarians    ", 
-#                                   "Fossil fuel industry (FFI)    ", 
-#                                   "Carbon-intensive industry (CII)    ", 
-#                                   "Total"))) %>% 
-#   replace(is.na(.), 0) %>% 
-#   group_by(type) %>% 
-#   mutate(moving_avg = rollmean(count, k=2, fill=NA, align='center'),
-#          moving_avg = ifelse(moving_avg < 0, 0, moving_avg),
-#          moving_avg_per = rollmean(proportion, k=3, fill=NA, align='center'),
-#          moving_avg_per = ifelse(moving_avg_per < 0, 0, moving_avg_per))
-
 COM_claims_year_boosted <- COM_claims_quarter_boosted %>% 
   mutate(year = floor_date(quarter, "year")) %>%
   group_by(year) %>%
@@ -1755,7 +1424,6 @@ Plot_COMBINED_quarterly <-
                          expand = c(0.01,0)) +
       scale_y_continuous(limits = c(0, 300),
                          breaks = scales::pretty_breaks(n=6)) +
-      # geom_vline(xintercept = legislation_important, linetype=4, color='darkgrey') +
       labs(x = "   Time", y = "N",
            color = "Witness category      ", linetype = "Witness category      ") +
       theme_classic() +
@@ -1773,7 +1441,6 @@ Plot_COMBINED_quarterly <-
                          expand = c(0.01,0)) +
       scale_y_continuous(limits = c(0, 10),
                          breaks = scales::pretty_breaks(n=8)) +
-      # geom_vline(xintercept = legislation_important, linetype=4, color='darkgrey') +
       labs(x = "   Time", 
            y = "%",
            color = "Witness category      ", linetype = "Witness category      ") +
@@ -1806,7 +1473,7 @@ ggsave(
 claim_labels = c("Climate policies are harmful",
                  "Climate policies are ineffective",
                  "Climate policy opposition for other reasons", 
-                 "Climate solutions won't work/aren't needed") # Any claim 4
+                 "Any solutions-contrarianism claim") # Any claim 4
 claim_colors = c("#44AA99","#DDCC77","#882255", "#A9A9A9")
 
 barchart_claim_4 <- rbind(CON_combined_quarter %>% 
@@ -1921,7 +1588,6 @@ Plot_CII_C_quarterly_roll <-
                      expand = c(0.01,0)) +
   labs(x = "   Time", y = "N") +
   theme_classic()
-
 
 ### Proportion quarterly rolling ----
 
@@ -2502,7 +2168,6 @@ strategy %>%
   geom_violin() +
   geom_rug(position = position_jitter(height = .5),
            sides = "r", alpha = 1, size = .2, length = unit(0.7,"cm")) +
-  scale_x_continuous(limits = c(-0.5, 0.75)) +
   scale_y_continuous(breaks = pretty_breaks(7),
                      labels = label_percent(scale = 1)) +
   labs(y = "Proportion of solutions-contrarianism sub-claims") +
@@ -2510,11 +2175,6 @@ strategy %>%
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
-
-
-strategy %>% ggplot(aes(x = claim_ratio)) + 
-  # geom_jitter(height = 1, width = 1) +
-  geom_histogram(bins = 5)
 
 ### Export ----
 ggsave(
@@ -2529,96 +2189,5 @@ ggsave(
   dpi = 300,
   limitsize = TRUE,
   bg = NULL)
-
-
-
-
-# Investigate if the attacks on the movement coinciding with 
-# solutions contrarianism are mainly attacking politicians
-
-df %>%  
-  filter(L1dummy_4 ==1) %>% 
-  filter(L2dummy_5_2 == 1) %>% 
-  select(L3dummy_5_2_1:L3dummy_5_2_5) %>% 
-  colSums()
-
-df %>%  
-  filter(L1dummy_4 ==1) %>% 
-  filter(L2dummy_5_3 == 1) %>% 
-  select(L3dummy_5_3_1:L3dummy_5_3_2) %>% 
-  colSums()
-
-
-
-claims <- df %>% 
-  select(starts_with("L")) %>% 
-  select(!"last_name") %>% names()
-
-claims <- claims %>% colSums() %>% as.table() %>% as.data.frame() %>% 
-  arrange(Var1)
-
-
-
-
-
-# Investigate testimonies ----
-
-## Opening paragraphs ----
-
-
-
-contrarian_paragraphs <- 
-  read.csv("Data/inference_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv") %>%
-  filter(witness_contrarian == "Contrarian") %>%
-  arrange(date, utterance, hearing_id, witness) %>%
-  select(hearing_id, title, date, utterance, witness, text) %>% 
-  print()
-
-fossil_paragraphs <- 
-  read.csv("Data/inference_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv") %>%
-  filter(witness_contrarian != "Contrarian") %>%
-  filter(witness_category == "Fossil Fuel Industry") %>%
-  arrange(date, utterance, hearing_id, witness) %>%
-  select(hearing_id, title, date, utterance, witness, text, pred_4) %>% 
-  print()
-
-write.csv(contrarian_paragraphs, "Data/contrarian_paragraphs.csv",
-          row.names	= F)
-
-opening_paragraphs <- 
-  contrarian_paragraphs %>% 
-  group_by(hearing_id, title, date, witness) %>% 
-  arrange(utterance) %>% 
-  filter(row_number() <=5) %>% 
-  ungroup() %>% 
-  print()
-
-write.csv(opening_paragraphs, "Data/contrarian_opening_paragraphs.csv",
-          row.names	= F)
-
-problem_paragraphs <-
-  fossil_paragraphs %>% 
-  # filter(grepl("issue", tolower(text))) %>% 
-  filter(grepl("climate change", tolower(text)))
-
-# write.csv(fossil_paragraphs, "Data/ffi_paragraphs.csv",
-# row.names	= F)
-
-for (x in 1:nrow(problem_paragraphs)) {
-  print(problem_paragraphs$hearing_id[x])
-  print(problem_paragraphs$utterance[x])
-  print(problem_paragraphs$text[x])
-  print(" ")
-} 
-
-
-df4 %>% 
-  filter(hearing_id == "111shrg20183") %>% 
-  filter(last_name == "Rowe") %>% 
-  select(pred_4, text)
-
-View(fossil_paragraphs)
-
-
 
 
