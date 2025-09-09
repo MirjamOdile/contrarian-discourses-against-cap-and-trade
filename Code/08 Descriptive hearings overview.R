@@ -1,7 +1,6 @@
 # Analysis ----
 
 # Libraries ----
-library(crosstable)
 library(magrittr)
 library(tidyverse)
 library(ggpubr)
@@ -22,14 +21,14 @@ setwd("../")
 # Create a folder for the Plots
 dir.create("Plots")
 # Save the filepath to the folder called Plots
-filepath_plots = paste0(toString(getwd()), "/Plots/")
+filepath_plots = paste0(toString(getwd()), "/Plots")
 
 ### Labelled contrarian paragraphs ----
-df <- read.csv("Data/contrarian_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv")
+df <- read.csv("Data_all_scripts/contrarian_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv")
 
 # Save dataframe for second labelling
 # write.csv(df %>% select(id, text), 
-#           "Data/CDACAT_contrarian_paragraphs_for_second_labelling.csv",
+#           "Data_all_scripts/CDACAT_contrarian_paragraphs_for_second_labelling.csv",
 #           row.names = F)
 
 #### Integrate final taxonomy revisions ----
@@ -116,11 +115,11 @@ congress_capandtrade_03_10 <- df %>%
   select(id, text, SuperClaims, SubClaims_lvl2, SubClaims_lvl3)
 
 # write.csv(congress_capandtrade_03_10,
-#           "Data/congress_capandtrade_03_10.csv", 
+#           "Data_all_scripts/congress_capandtrade_03_10.csv", 
 #           row.names = F)
 
 ### All witness paragraphs with wordcount >=10 with claim 4 predictions----
-df4 <- read.csv("Data/inference_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv") %>%
+df4 <- read.csv("Data_all_scripts/inference_witnesses_03_10_utterances_witnesses_MoCs_labels_for_plotting.csv") %>%
   subset(type == "witness") %>% 
   subset(word_count >= 10)
 
@@ -237,8 +236,8 @@ CON_predicted <- df4 %>%
 
 ## Labelled FFI and CII validation samples ----
 
-FFI_val <-  read.csv("Data/codacat_validation_samples_ffi_labelled.csv")
-CII_val <-  read.csv("Data/codacat_validation_samples_cii_labelled.csv")
+FFI_val <-  read.csv("Data_all_scripts/codacat_validation_samples_ffi_labelled.csv")
+CII_val <-  read.csv("Data_all_scripts/codacat_validation_samples_cii_labelled.csv")
 
 
 # Part 1: Overview ----
@@ -318,7 +317,7 @@ PA1 <-
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
 ### Export ----
-
+filepath_plots
 ggsave(
   filename = "HearingsClaimsProportion.pdf",
   plot = PA1,
@@ -1473,7 +1472,7 @@ ggsave(
 claim_labels = c("Climate policies are harmful",
                  "Climate policies are ineffective",
                  "Climate policy opposition for other reasons", 
-                 "Any solutions-contrarianism claim") # Any claim 4
+                 "Any solutions-focused scepticism claim") # Any claim 4
 claim_colors = c("#44AA99","#DDCC77","#882255", "#A9A9A9")
 
 barchart_claim_4 <- rbind(CON_combined_quarter %>% 
@@ -2018,7 +2017,7 @@ data_long <- as.data.frame(data) %>%
   mutate(adjacency = ifelse(weights > 0, 1, 0))
 # Inspect co-occurrences
 table(data_long$weights)
-# Drop all edges that represent fewer than 3 co-occurences
+# Drop all edges that represent fewer than 3 co-occurrences
 data_plot <- data_long %>% 
   filter(weights >= 3)
 # Create the plot
@@ -2045,10 +2044,10 @@ subclaim_cooccurrence <-
   labs(color = "Super-claim", fill = "Super-claim",
        size = "Super-claim count") +
   scale_edge_width(range = c(.5, 1), 
-                   name = "Sub-claim co-occurence",
+                   name = "Sub-claim co-occurrence",
                    breaks = c(5, 20, 40, 60)) + 
   scale_edge_alpha(range = c(.05, 1.2),
-                   name = "Sub-claim co-occurence",
+                   name = "Sub-claim co-occurrence",
                    breaks = c(5, 20, 40, 60)) +
   scale_size_continuous(range=c(0.01,5.5)) +
   scale_color_manual(values=superclaim_colors, 
@@ -2087,7 +2086,7 @@ ggsave(
   limitsize = TRUE,
   bg = NULL)
 
-# Plot 5: Proportion of solutions contrarianism in contrarian testimonies ----
+# Plot 5: Proportion of solutions-focused scepticism in contrarian testimonies ----
 
 ## Data preparation ----
 
@@ -2112,11 +2111,11 @@ strategy <- df %>%
          top_claim = ifelse(total_claims == 0, NA, top_claim),
          core_strategy = case_when(
            claim_not4 == 0 & claim_4 == 0 ~ "No claim",
-           claim_not4 == 0 & claim_4 != 0 ~ "Exclusively solutions contrarianism",
+           claim_not4 == 0 & claim_4 != 0 ~ "Exclusively solutions-focused scepticism",
            claim_not4 != 0 & claim_4 == 0 ~ "Exclusively other contrarianism",
            claim_not4 != 0 & claim_4 != 0 ~ "Mixed strategy"),
          core_strategy_binary = ifelse(claim_4>claim_not4,
-                                       "Solutions contrarianism",
+                                       "solutions-focused scepticism",
                                        "Other contrarianism"),
          claim_ratio = claim_4/(claim_4+claim_not4)*100)
 
@@ -2156,7 +2155,7 @@ strategy_plot <-
   scale_x_continuous(limits = c(-0.5, 0.75)) +
   scale_y_continuous(breaks = pretty_breaks(7),
                      labels = label_percent(scale = 1)) +
-  labs(y = "Proportion of solutions-contrarianism sub-claims") +
+  labs(y = "Proportion of solutions-focused scepticism sub-claims") +
   theme_minimal() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -2170,7 +2169,7 @@ strategy %>%
            sides = "r", alpha = 1, size = .2, length = unit(0.7,"cm")) +
   scale_y_continuous(breaks = pretty_breaks(7),
                      labels = label_percent(scale = 1)) +
-  labs(y = "Proportion of solutions-contrarianism sub-claims") +
+  labs(y = "Proportion of solutions-focused scepticism sub-claims") +
   theme_minimal() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
